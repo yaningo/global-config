@@ -11,7 +11,7 @@ jobs:
           command: |
             while IFS= read -r repo
               do
-                echo "BLOB_SHA=$(curl --location --request GET 'https://api.github.com/repos/yaningo/setup-again/contents/.circleci/config.yml' --header 'Authorization: token e5a581583178d8d9d3b302fe251b94cc5f42b6b2' --header 'Accept: application/vnd.github.v3+json'|jq -r .sha)" >> $BASH_ENV
+                echo "BLOB_SHA=$(curl --location --request GET 'https://api.github.com/repos/yaningo/setup-again/contents/.circleci/config.yml' --header 'Authorization: token 09d251137e76c1645062ee58cee109690920a225' --header 'Accept: application/vnd.github.v3+json'|jq -r .sha)" >> $BASH_ENV
                 source $BASH_ENV
                 echo $BLOB_SHA
               done < "satellites.txt"
