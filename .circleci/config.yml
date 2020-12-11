@@ -1,0 +1,17 @@
+version: 2.1
+
+
+jobs:
+  deploy-config:
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
+      - run:
+          command: ./manage.py test
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - deploy-config
