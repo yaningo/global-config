@@ -10,12 +10,13 @@ jobs:
       - run:
           name: Test
           command: |
+            base64 -w 0 global-ci.yml > GLOBAL_64
             while IFS= read -r repo
               do
                 echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
                 source $BASH_ENV
                 echo $BLOB_SHA
-                curl --location --request GET "https://api.github.com/repos/yaningo/setup-again/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"
+                curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"Global config update", "content":$GLOBAL_64", "sha":"$BLOB_SHA"
               done < "satellites.txt"
           
 
