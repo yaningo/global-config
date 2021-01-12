@@ -1,6 +1,5 @@
 version: 2
 
-
 jobs:
   deploy-config:
     docker:
@@ -20,6 +19,7 @@ jobs:
           
 
 workflows:
+version: 2
   main:
     jobs:
       - deploy-config
