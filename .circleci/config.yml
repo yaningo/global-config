@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   deploy-config:
@@ -19,7 +19,7 @@ jobs:
           
 
 workflows:
-  version: 2
+#  version: 2
   main:
     jobs:
       - deploy-config
