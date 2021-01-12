@@ -16,6 +16,9 @@ jobs:
                 source $BASH_ENV
                 curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\", \"sha\":\"${BLOB_SHA}\"}"
               done < "satellites.txt"
+      - run:
+          name: Get commit info
+          command: curl --location --request GET "https://api.github.com/repo/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" -d "sha: << pipeline.git.revision >>"
           
 
 workflows:
