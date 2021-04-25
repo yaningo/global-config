@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Check global config validity
-          run: circleci validate global-ci.yml
+          run: circleci config validate global-ci.yml
     
   deploy-config:
     docker:
@@ -19,9 +19,11 @@ jobs:
           name: TestTest
           command: |
             echo GLOBAL_64=$(base64 -w 0 global-ci.yml) >> $BASH_ENV
-            while IFS= read -r repo
+            while IFS="," read -r destination
               do
-                echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
+                REPO=awk '{ print $1}'
+                BRANCH= awk '{ print $2}'
+                echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
                 source $BASH_ENV
                 curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\", \"sha\":\"${BLOB_SHA}\"}"
               done < "satellites.txt"
