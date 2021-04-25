@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Check global config validity
-          run: circleci config validate global-ci.yml
+          command: circleci config validate global-ci.yml
     
   deploy-config:
     docker:
