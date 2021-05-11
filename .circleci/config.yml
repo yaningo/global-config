@@ -23,8 +23,8 @@ jobs:
             echo $GLOBAL_64
             while IFS= read -r destination
               do
-                echo 'export REPO="$(echo $destination | awk -F',' '{print $1}')" ' >> $BASH_ENV
-                echo 'export BRANCH="$(echo $destination | awk -F',' '{print $2}')" ' >> $BASH_ENV
+                echo "export REPO=$(echo $destination | awk -F',' '{print $1}')" >> $BASH_ENV
+                echo "export BRANCH=$(echo $destination | awk -F',' '{print $2}')" >> $BASH_ENV
                 source $BASH_ENV
                 echo $REPO
                 echo $BRANCH
