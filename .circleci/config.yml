@@ -21,6 +21,7 @@ jobs:
             echo GLOBAL_64=$(base64 -w 0 global-ci.yml) >> $BASH_ENV
             while read -r destination
               do
+                IFS=", "
                 echo "export REPO=$(awk '{ print $1}') < $destination" >>$BASH_ENV
                 echo "export BRANCH=$(awk '{ print $2}') < $destination" >>$BASH_ENV
                 source $BASH_ENV
