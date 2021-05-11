@@ -21,8 +21,8 @@ jobs:
             echo GLOBAL_64=$(base64 -w 0 global-ci.yml) >> $BASH_ENV
             while read -r destination
               do
-                REPO=$(awk 'BEGIN{FS=", "} { print $1 }' < "$destination")
-                BRANCH=$(awk 'BEGIN{FS=", "} { print $2 }' < "$destination")
+                REPO=$(echo $destination | awk -F',' '{print $1}')
+                BRANCH=$(echo $destination | awk -F',' '{print $2}')
                 echo $REPO
                 echo $BRANCH
                 if [ "$(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json")" -eq "404" ];
