@@ -42,7 +42,7 @@ jobs:
                     echo 'export BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)' >> $BASH_ENV
                     source $BASH_ENV
                     echo $BLOB_SHA
-                    curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"path":".circleci/config.yml","message":"Global config update","content":"${GLOBAL_64}","sha": "${BLOB_SHA}","branch":"${BRANCH}"}'
+                    curl -X PUT https://api.github.com/repos/$REPO/contents --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"path":".circleci/config.yml","message":"Global config update","content":"${GLOBAL_64}","sha": "${BLOB_SHA}","branch":"${BRANCH}"}'
                 fi
               done < "satellites.txt"
       - run:
