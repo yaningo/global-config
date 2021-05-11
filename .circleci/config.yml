@@ -19,9 +19,8 @@ jobs:
           name: TestTest
           command: |
             echo GLOBAL_64=$(base64 -w 0 global-ci.yml) >> $BASH_ENV
-            while read -r destination
+            while IFS=", " read -r destination
               do
-                IFS=", "
                 REPO=$(awk '{ print $1}' < "$destination")
                 BRANCH=$(awk '{ print $2}' < "$destination")
                 echo $REPO
