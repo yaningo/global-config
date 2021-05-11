@@ -21,15 +21,16 @@ jobs:
             echo GLOBAL_64=$(base64 -w 0 global-ci.yml) >> $BASH_ENV
             while read -r destination
               do
-                REPO=$(awk '{ print $1}')
-                BRANCH=$(awk '{ print $2}')
+                echo "export REPO=$(awk '{ print $1}')" >>$BASH_ENV
+                echo "export BRANCH=$(awk '{ print $2}')" >>$BASH_ENV
+                source $BASH_ENV
                 echo $REPO
                 echo $BRANCH
                 if [ "$(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json")" -eq "404" ];
                   then
                     curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\"}"
                   else
-                    echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
+                    echo "export BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)" >> $BASH_ENV
                     source $BASH_ENV
                     curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\", \"sha\":\"${BLOB_SHA}\"}"
                 fi
