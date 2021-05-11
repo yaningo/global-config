@@ -22,8 +22,8 @@ jobs:
             while read -r destination
               do
                 IFS=", "
-                echo "export REPO=$(awk '{ print $1}') < $destination" >>$BASH_ENV
-                echo "export BRANCH=$(awk '{ print $2}') < $destination" >>$BASH_ENV
+                echo "export REPO=$(awk '{ print $1}' < $destination") >>$BASH_ENV
+                echo "export BRANCH=$(awk '{ print $2}' < $destination") >>$BASH_ENV
                 source $BASH_ENV
                 echo $REPO
                 echo $BRANCH
