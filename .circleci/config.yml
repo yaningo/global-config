@@ -31,8 +31,10 @@ jobs:
                 curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json"
                 if [ '$(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json")' == "404" ];
                   then
+                    echo "Debug: the response is 404"
                     curl --location --request PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token $GH_TOKEN" --header 'Accept: application/vnd.github.v3+json' --data-raw '{"message": "Global config update", "content": "$GLOBAL_64", "branch": "$BRANCH"}'
                   else
+                    echo "Debug: the response is 200"
                     echo 'export BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)' >> $BASH_ENV
                     source $BASH_ENV
                     echo $BLOB_SHA
