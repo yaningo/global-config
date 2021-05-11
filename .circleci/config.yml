@@ -34,7 +34,7 @@ jobs:
                     echo "Debug: the response is 404"
                     echo $REPO
                     echo $BRANCH
-                    curl --location --request PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token $GH_TOKEN" --header 'Accept: application/vnd.github.v3+json' --data-raw '{"message":"Global config update","content":"$GLOBAL_64","branch":"$BRANCH"}'
+                    curl --location --request PUT "https://api.github.com/repos/$REPO/contents/.circleci/config.yml" -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"Global config update","content":"$GLOBAL_64","branch":"$BRANCH"}'
                   else
                     echo "Debug: the response is 200"
                     echo $REPO
@@ -42,7 +42,7 @@ jobs:
                     echo 'export BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)' >> $BASH_ENV
                     source $BASH_ENV
                     echo $BLOB_SHA
-                    curl --location --request PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"Global config update","content":"${GLOBAL_64}","sha": "${BLOB_SHA}","branch":"${BRANCH}"}'
+                    curl --location --request PUT "https://api.github.com/repos/$REPO/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"Global config update","content":"${GLOBAL_64}","sha": "${BLOB_SHA}","branch":"${BRANCH}"}'
                 fi
               done < "satellites.txt"
       - run:
