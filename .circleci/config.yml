@@ -24,9 +24,14 @@ jobs:
                 IFS=", "
                 REPO=awk '{ print $1}'
                 BRANCH= awk '{ print $2}'
-                echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
-                source $BASH_ENV
-                curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\", \"sha\":\"${BLOB_SHA}\"}"
+                if [ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json") -eq 404);
+                  then
+                    curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\"}"
+                  else
+                    echo BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha) >> $BASH_ENV
+                    source $BASH_ENV
+                    curl --location --request PUT "https://api.github.com/repos/$repo/contents/.circleci/config.yml" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw "{\"message\":\"Global config update\", \"content\":\"$GLOBAL_64\", \"sha\":\"${BLOB_SHA}\"}"
+                fi
               done < "satellites.txt"
       - run:
           name: Get commit info
@@ -35,12 +40,11 @@ jobs:
             # curl --location --request GET "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" -d "sha: << pipeline.git.revision >>"
             git log  -n 1
           
-
 workflows:
 #  version: 2
   main:
     jobs:
-      - config-validation
+      # - config-validation
       - deploy-config:
-          requires:
-            - config-validation
+          # requires:
+            # - config-validation
