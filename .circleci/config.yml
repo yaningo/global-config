@@ -20,6 +20,10 @@ jobs:
         default: true
       config-file:
         type: string
+        default: global-ci.yml
+      targets-list:
+        type: string
+        default: satellites.txt
     docker:
       - image: circleci/python
     steps:
@@ -27,11 +31,16 @@ jobs:
       - when:
           condition: << parameters.skip-targets-build >>
           steps:
-            - run: echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
+            - run:
+                name: As per your parameters: No build on target-projects upon config push
+                command: echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
       - unless:
           condition: << parameters.skip-targets-build >>
           steps:
-            - run: echo ' export MESSAGE="Global config update" ' >> BASH_ENV
+            - run:
+                name: As per your parameters: The global config update will trigger a build in the target-project
+                command: echo ' export MESSAGE="Global config update" ' >> BASH_ENV
+                
       - run:
           name: TestTest
           command: |
@@ -67,7 +76,7 @@ jobs:
                           echo "Not pushing same version of the config file"
                       fi
                 fi  
-              done < "satellites.txt"
+              done < << parameters.targets-list >>
       - run:
           name: Get commit infosss
           command: |
