@@ -18,6 +18,8 @@ jobs:
       skip-targets-build:
         type: boolean
         default: true
+      config-file:
+        type: string
     docker:
       - image: circleci/python
     steps:
@@ -81,5 +83,6 @@ workflows:
       - deploy-config:
           skip-targets-build: true
           force-update: true
+          config-file: toto.txt
           # requires:
             # - config-validation
