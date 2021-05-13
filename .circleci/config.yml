@@ -35,7 +35,7 @@ jobs:
       - run:
           name: TestTest
           command: |
-            echo 'export GLOBAL_64="$(cat global-ci.yml | base64 -w 0)" ' >> $BASH_ENV
+            echo 'export GLOBAL_64="$(cat << parameters.config-file >>l | base64 -w 0)" ' >> $BASH_ENV
             source $BASH_ENV
             echo $GLOBAL_64
             while read -r destination
