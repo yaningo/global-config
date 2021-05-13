@@ -32,13 +32,13 @@ jobs:
           condition: << parameters.skip-targets-build >>
           steps:
             - run:
-                name: As per your parameters: No build on target-projects upon config push
+                name: "As per your parameters, no build on target-projects upon config push"
                 command: echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
       - unless:
           condition: << parameters.skip-targets-build >>
           steps:
             - run:
-                name: As per your parameters: The global config update will trigger a build in the target-project
+                name: "As per your parameters, the global config update will trigger a build in the target-project"
                 command: echo ' export MESSAGE="Global config update" ' >> BASH_ENV
                 
       - run:
