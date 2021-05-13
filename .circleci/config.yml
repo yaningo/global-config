@@ -69,6 +69,7 @@ workflows:
   main:
     jobs:
       # - config-validation
-      - deploy-config
+      - deploy-config:
+          skip-targets-build: false
           # requires:
             # - config-validation
