@@ -12,6 +12,9 @@ jobs:
     
   deploy-config:
     parameters:
+      force-update:
+        type: boolean
+        default: false
       skip-targets-build:
         type: boolean
         default: true
@@ -20,11 +23,11 @@ jobs:
     steps:
       - checkout
       - when:
-          condition: <<parameters.skip-targets-build>>
+          condition: << parameters.skip-targets-build >>
           steps:
             - run: echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
       - unless:
-          condition: <<parameters.skip-targets-build>>
+          condition: << parameters.skip-targets-build >>
           steps:
             - run: echo ' export MESSAGE="Global config update" ' >> BASH_ENV
       - run:
@@ -55,7 +58,7 @@ jobs:
                     source $BASH_ENV
                     echo $BLOB_SHA
                     echo "Central config blob is $(git hash-object global-ci.yml)"
-                      if [[ $(git hash-object global-ci.yml) != $BLOB_SHA ]];
+                      if [[ $(git hash-object global-ci.yml) != $BLOB_SHA ]] || [[ << parameters.force-update >> ]];
                         then
                           curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"${BLOB_SHA}"'","branch":"'"$BRANCH"'"}'
                         else
@@ -77,5 +80,6 @@ workflows:
       # - config-validation
       - deploy-config:
           skip-targets-build: true
+          force-update: true
           # requires:
             # - config-validation
