@@ -2,13 +2,14 @@ version: 2.1
 
 jobs:
   config-validation:
-    machine: true
+    docker:
+      - image: circleci/python
     steps:
       - checkout
       - run:
           name: Check global config validity
           command: |
-              circleci config validate toto.txt
+              circleci config process toto.txt | circleci config validate 
     
   deploy-config:
     parameters:
