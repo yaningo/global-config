@@ -22,7 +22,7 @@ jobs:
         description: Name of the configuration file to be deployed to all targets (REQUIRED)
         type: string
       targets-list:
-        descritpion: File containing the list of repo and branch targets -> format -> org/repo, branch -> 1 target per line (REQUIRED)
+        description: File containing the list of repo and branch targets -> format -> org/repo, branch -> 1 target per line (REQUIRED)
         type: string
         
     docker:
