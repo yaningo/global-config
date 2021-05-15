@@ -15,27 +15,28 @@ jobs:
       force-update:
         type: boolean
         default: false
-      skip-targets-build:
+      skip-build-on-targets:
         type: boolean
         default: true
-      config-file:
+      config-to-deploy:
+        desciption: Name of the configuration file to be deployed to all targets (REQUIRED)
         type: string
-        default: global-ci.yml
       targets-list:
+        descritpion: File containing the list of repo and branch targets -> format -> org/repo, branch -> 1 target per line (REQUIRED)
         type: string
-        default: satellites.txt
+        
     docker:
       - image: circleci/python
     steps:
       - checkout
       - when:
-          condition: << parameters.skip-targets-build >>
+          condition: << parameters.skip-build-on-targets >>
           steps:
             - run:
                 name: "As per your parameters, no build on target-projects upon config push"
                 command: echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
       - unless:
-          condition: << parameters.skip-targets-build >>
+          condition: << parameters.skip-build-on-targets >>
           steps:
             - run:
                 name: "As per your parameters, the global config update will trigger a build in the target-project"
@@ -44,7 +45,7 @@ jobs:
       - run:
           name: TestTest
           command: |
-            echo 'export GLOBAL_64="$(cat << parameters.config-file >>l | base64 -w 0)" ' >> $BASH_ENV
+            echo 'export GLOBAL_64="$(cat << parameters.config-to-deploy >>l | base64 -w 0)" ' >> $BASH_ENV
             source $BASH_ENV
             echo $GLOBAL_64
             while read -r destination
@@ -90,8 +91,8 @@ workflows:
     jobs:
       # - config-validation
       - deploy-config:
-          skip-targets-build: true
+          skip-build-on-targets: true
           force-update: true
-          config-file: toto.txt
+          config-to-deploy: toto.txt
           # requires:
             # - config-validation
