@@ -2,8 +2,7 @@ version: 2.1
 
 jobs:
   config-validation:
-    docker:
-      machine: true
+    machine: true
     steps:
       - checkout
       - run:
