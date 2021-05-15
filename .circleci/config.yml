@@ -93,7 +93,7 @@ workflows:
       - deploy-config:
           # skip-build-on-targets: true
           # force-update: true
-          config-to-deploy: toto.txt
+          config-to-deploy: toto.yml
           targets-list: yoyo.txt
           requires:
             - config-validation
