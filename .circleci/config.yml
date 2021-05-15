@@ -8,7 +8,9 @@ jobs:
       - checkout
       - run:
           name: Check global config validity
-          command: circleci config validate toto.txt
+          command: |
+              circleci update
+              circleci config validate toto.txt
     
   deploy-config:
     parameters:
