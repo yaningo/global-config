@@ -1,15 +1,15 @@
 version: 2.1
 
 jobs:
-  config-validation:
-    docker:
-      - image: circleci/python
-    steps:
-      - checkout
-      - run:
-          name: Check global config validity
-          command: |
-              circleci config process toto.txt | circleci config validate 
+#   config-validation:
+#     docker:
+#       - image: circleci/python
+#     steps:
+#       - checkout
+#       - run:
+#           name: Check global config validity
+#           command: |
+#               circleci config process toto.txt | circleci config validate 
     
   deploy-config:
     parameters:
@@ -23,7 +23,7 @@ jobs:
         description: Name of the configuration file to be deployed to all targets (REQUIRED)
         type: string
       targets-list:
-        description: File containing the list of repo and branch targets -> format -> org/repo, branch -> 1 target per line (REQUIRED)
+        description: "File containing the list of repo and branch targets. Format : org/repo, branch -> 1 target per line (REQUIRED)"
         type: string
         
     docker:
@@ -96,5 +96,5 @@ workflows:
           # force-update: true
           config-to-deploy: toto.yml
           targets-list: yoyo.txt
-          requires:
-            - config-validation
+#           requires:
+#             - config-validation
