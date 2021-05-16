@@ -29,7 +29,7 @@ commands:
             }
             
             BuildOrNot() {
-                        if [ << parameters.skip-build-on-targets >> ]; then
+                        if << parameters.skip-build-on-targets >>; then
                             echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                             echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
                          else
