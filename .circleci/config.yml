@@ -105,7 +105,7 @@ workflows:
   main:
     jobs:
 #       - config-validation
-      - deploy-config:
+      - deploy-config
           # skip-build-on-targets: true
           # force-update: true
 #           config-to-deploy: toto.yml
