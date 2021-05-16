@@ -35,7 +35,7 @@ commands:
             CheckEnvVars() {
                         if [ -z "${GHH_TOKEN:-}" ]; then
                             echo "In order to use the Config dispatcher orb, an OAuth token must be present via the GH_TOKEN environment variable."
-                            echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
+                            echo "See instructions in the GitHub documentation:" "https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
                             exit 1
                         fi
             }
