@@ -36,6 +36,7 @@ commands:
                             echo "As per your parameters, the global config update will trigger a build in the target project(s)"
                             echo ' export MESSAGE="Global config update" ' >> BASH_ENV
             
+            }
             
             CheckEnvVars
             BuildOrNot
@@ -74,7 +75,7 @@ commands:
                       fi
                 fi  
               done < << parameters.targets-list >>
-              when: on_success
+              when: on_fail
 jobs:
 #   config-validation:
 #     docker:
