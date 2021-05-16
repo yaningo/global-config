@@ -93,6 +93,7 @@ jobs:
     steps:
       - checkout
       - dispatch:
+          skip-build-on-targets: false
           config-to-deploy: toto.yml
           targets-list: yoyo.txt
       - run:
@@ -108,7 +109,7 @@ workflows:
     jobs:
 #       - config-validation
       - deploy-config
-          # skip-build-on-targets: true
+#           skip-build-on-targets: false
           # force-update: true
 #           config-to-deploy: toto.yml
 #           targets-list: yoyo.txt
