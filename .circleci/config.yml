@@ -75,7 +75,7 @@ commands:
                       fi
                 fi  
               done < << parameters.targets-list >>
-              when: on_fail
+          when: on_fail
 jobs:
 #   config-validation:
 #     docker:
