@@ -90,7 +90,7 @@ workflows:
 #  version: 2
   main:
     jobs:
-      - config-validation
+#       - config-validation
       - deploy-config:
           # skip-build-on-targets: true
           # force-update: true
