@@ -78,7 +78,6 @@ commands:
                       fi
                 fi  
               done < ${TARGET_LIST}
-          when: on_fail
 jobs:
   config-validation:
     docker:
@@ -110,5 +109,5 @@ workflows:
     jobs:
       - config-validation
       - deploy-config
-#         requires:
-#           - config-validation
+        requires:
+          - config-validation
