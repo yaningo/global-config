@@ -108,6 +108,6 @@ workflows:
   main:
     jobs:
       - config-validation
-      - deploy-config
+      - deploy-config:
         requires:
           - config-validation
