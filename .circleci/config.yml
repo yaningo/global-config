@@ -44,10 +44,10 @@ commands:
       - run:
           name: Deploying configuration to targets
           environment:
-            CENTRAL_CONGIG: << parameters.config-to-deploy >>
+            CENTRAL_CONFIG: << parameters.config-to-deploy >>
             TARGET_LIST: << parameters.targets-list >>
           command: |
-            echo 'export GLOBAL_64="$(cat ${CENTRAL_CONGIG} | base64 -w 0)" ' >> $BASH_ENV
+            echo 'export GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)" ' >> $BASH_ENV
             while read -r destination
               do
                 echo "export REPO=$(echo $destination | awk -F', ' '{print $1}')" >> BASH_ENV
