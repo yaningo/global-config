@@ -80,6 +80,10 @@ commands:
               done < ${TARGET_LIST}
 jobs:
   config-validation:
+    parameters:
+      config-to-deploy:
+        description: Path to the configuration file to be deployed to all targets [REQUIRED]
+        type: string
     docker:
       - image: circleci/python
     steps:
@@ -87,7 +91,7 @@ jobs:
       - run:
           name: Check global config validity
           command: |
-              circleci config process toto.txt | circleci config validate 
+              circleci config validate << parameters.config-to-deploy >>
     
   deploy-config:
     docker:
@@ -109,5 +113,6 @@ workflows:
     jobs:
       - config-validation
       - deploy-config:
-        requires:
-          - config-validation
+          requires:
+            - config-validation:
+                config-to-deploy: global-ci.yml
