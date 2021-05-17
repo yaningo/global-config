@@ -18,7 +18,7 @@ commands:
         
     steps:
       - run:
-          name: Check stuff
+          name: Checking environment variables and parameters
           command: |
             CheckEnvVars() {
                         if [ -z "${GH_TOKEN:-}" ]; then
@@ -43,8 +43,11 @@ commands:
             
       - run:
           name: Deploying configuration to targets
+          environment:
+            CENTRAL_CONGIG: << parameters.config-to-deploy >>
+            TARGET_LIST: << parameters.targets-list >>
           command: |
-            echo 'export GLOBAL_64="$(cat << parameters.config-to-deploy >>l | base64 -w 0)" ' >> $BASH_ENV
+            echo 'export GLOBAL_64="$(cat ${CENTRAL_CONGIG} | base64 -w 0)" ' >> $BASH_ENV
             while read -r destination
               do
                 echo "export REPO=$(echo $destination | awk -F', ' '{print $1}')" >> BASH_ENV
@@ -74,18 +77,18 @@ commands:
                           echo "Not pushing same version of the config file"
                       fi
                 fi  
-              done < << parameters.targets-list >>
+              done < ${TARGET_LIST}
           when: on_fail
 jobs:
-#   config-validation:
-#     docker:
-#       - image: circleci/python
-#     steps:
-#       - checkout
-#       - run:
-#           name: Check global config validity
-#           command: |
-#               circleci config process toto.txt | circleci config validate 
+  config-validation:
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
+      - run:
+          name: Check global config validity
+          command: |
+              circleci config process toto.txt | circleci config validate 
     
   deploy-config:
     docker:
@@ -93,25 +96,19 @@ jobs:
     steps:
       - checkout
       - dispatch:
-          skip-build-on-targets: false
-          config-to-deploy: toto.yml
-          targets-list: yoyo.txt
+          config-to-deploy: global-ci.yml
+          targets-list: satellites.txt
       - run:
-          name: Get commit infosss
+          name: Get commit info
           command: |
             echo << pipeline.git.revision >>
             # curl --location --request GET "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" -d "sha: << pipeline.git.revision >>"
             git log  -n 1
           
 workflows:
-#  version: 2
   main:
     jobs:
-#       - config-validation
+      - config-validation
       - deploy-config
-#           skip-build-on-targets: false
-          # force-update: true
-#           config-to-deploy: toto.yml
-#           targets-list: yoyo.txt
-#           requires:
-#             - config-validation
+#         requires:
+#           - config-validation
