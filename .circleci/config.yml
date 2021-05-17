@@ -111,8 +111,8 @@ jobs:
 workflows:
   main:
     jobs:
-      - config-validation
+      - config-validation:
+          config-to-deploy: global-ci.yml
       - deploy-config:
           requires:
-            - config-validation:
-                config-to-deploy: global-ci.yml
+            - config-validation
