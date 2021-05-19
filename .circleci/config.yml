@@ -19,6 +19,9 @@ commands:
     steps:
       - run:
           name: Checking environment variables and parameters
+          environment:
+            SKIP: << parameters.skip-build-on-targets >>
+            CENTRAL_CONFIG: << parameters.config-to-deploy >>
           command: |
             CheckEnvVars() {
                         if [ -z "${GH_TOKEN:-}" ]; then
@@ -27,9 +30,17 @@ commands:
                             exit 1
                         fi
             }
-            
+
+            NotThisConfig() {
+                        if [ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]; then
+                            echo "The configuratio file you're deploying can't be the same as this build's confguration file"
+                            echo "Check the content of the configuratio file you're trying to deploy"
+                            exit 1
+                        fi
+            }
+
             BuildOrNot() {
-                        if [ << parameters.skip-build-on-targets >> = true ]; then
+                        if [ $SKIP = true ]; then
                             echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                             echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
                          else
@@ -37,8 +48,9 @@ commands:
                             echo ' export MESSAGE="Global config update" ' >> BASH_ENV
                         fi
             }
-            
+
             CheckEnvVars
+            NotThisConfig
             BuildOrNot
             
       - run:
@@ -46,52 +58,40 @@ commands:
           environment:
             CENTRAL_CONFIG: << parameters.config-to-deploy >>
             TARGET_LIST: << parameters.targets-list >>
+            FORCE: << parameters.force-update >>
           command: |
-            echo 'export GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)" ' >> $BASH_ENV
-            while read -r destination
-              do
-                echo "export REPO=$(echo $destination | awk -F', ' '{print $1}')" >> BASH_ENV
-                echo "export BRANCH=$(echo $destination | awk -F', ' '{print $2}')" >> BASH_ENV
-                source BASH_ENV
-                echo $REPO
-                echo $BRANCH
-                
-                if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") == 404 ]];
-                  then
-                    echo "Debug: the response is 404"
-                    echo $REPO
-                    echo $BRANCH
-                    curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}'
-                  else
-                    echo "Debug: the response is 200"
-                    echo $REPO
-                    echo $BRANCH
-                    echo 'export BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)' >> $BASH_ENV
-                    source $BASH_ENV
-                    echo $BLOB_SHA
-                    echo "Central config blob is $(git hash-object global-ci.yml)"
-                      if [[ $(git hash-object global-ci.yml) != $BLOB_SHA ]] || [[ << parameters.force-update >> ]];
-                        then
-                          curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"${BLOB_SHA}"'","branch":"'"$BRANCH"'"}'
-                        else
-                          echo "Not pushing same version of the config file"
-                      fi
-                fi  
-              done < ${TARGET_LIST}
+            DeployConf() {
+                        GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
+                        while read -r target
+                          do
+                            REPO=$(echo $target | awk -F', ' '{print $1}')
+                            BRANCH=$(echo $target | awk -F', ' '{print $2}')
+                            if [ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") = 404 ]; then
+                              curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}'
+                            else
+                              BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
+                              if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE} ]]; then
+                                curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}'
+                              else
+                                echo "Not pushing same version of the config file"
+                              fi
+                            fi  
+                          done < ${TARGET_LIST}
+            }
 jobs:
-  config-validation:
-    parameters:
-      config-to-deploy:
-        description: Path to the configuration file to be deployed to all targets [REQUIRED]
-        type: string
-    docker:
-      - image: circleci/python
-    steps:
-      - checkout
-      - run:
-          name: Check global config validity
-          command: |
-              circleci config validate << parameters.config-to-deploy >>
+  # config-validation:
+  #   parameters:
+  #     config-to-deploy:
+  #       description: Path to the configuration file to be deployed to all targets [REQUIRED]
+  #       type: string
+  #   docker:
+  #     - image: circleci/python
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Check global config validity
+  #         command: |
+  #             circleci config validate << parameters.config-to-deploy >>
     
   deploy-config:
     docker:
@@ -111,8 +111,8 @@ jobs:
 workflows:
   main:
     jobs:
-      - config-validation:
-          config-to-deploy: global-ci.yml
-      - deploy-config:
-          requires:
-            - config-validation
+      # - config-validation:
+      #     config-to-deploy: global-ci.yml
+      - deploy-config
+          # requires:
+            # - config-validation
