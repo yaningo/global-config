@@ -40,7 +40,7 @@ commands:
             }
 
             BuildOrNot() {
-                        if [[ $SKIP == true ]]; then
+                        if [[ ${SKIP} == true ]]; then
                             echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                             echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
                          else
@@ -70,12 +70,12 @@ commands:
                             echo $REPO
                             echo$RANCH
                             if [ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") = 404 ]; then
-                              curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}'
+                              curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"${MESSAGE}"'","content":"'"$GLOBAL_64"'","branch":"'"$BRANCH"'"}'
                             else
-                              BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
+                              BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
                               echo $BLOB_SHA
                               if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE} ]]; then
-                                curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}'
+                                curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"${MESSAGE}"'","content":"'"$GLOBAL_64"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}'
                               else
                                 echo "Not pushing same version of the config file"
                               fi
