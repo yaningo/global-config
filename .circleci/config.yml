@@ -31,7 +31,7 @@ commands:
             }
             
             BuildOrNot() {
-                        if [ $SKIP = true ]; then
+                        if [ "$SKIP" = true ]; then
                             echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                             echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
                          else
@@ -53,7 +53,7 @@ commands:
             echo 'export GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)" ' >> $BASH_ENV
             while read -r target
               do
-                echo "export REPO=$(echo $trget | awk -F', ' '{print $1}')" >> BASH_ENV
+                echo "export REPO=$(echo $target | awk -F', ' '{print $1}')" >> BASH_ENV
                 echo "export BRANCH=$(echo $target | awk -F', ' '{print $2}')" >> BASH_ENV
                 source BASH_ENV
                 echo $REPO
