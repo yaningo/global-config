@@ -1,8 +1,8 @@
 version: 2.1
 
 commands:
-  pull-config:
-    parameters:
+#   pull-config:
+#     parameters:
 
   dispatch-config:
     parameters:
