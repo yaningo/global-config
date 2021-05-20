@@ -107,7 +107,7 @@ jobs:
       - image: circleci/python
     steps:
       - checkout
-      - dispatch:
+      - dispatch-config:
           config-to-deploy: global-ci.yml
           targets-list: satellites.txt
       - run:
