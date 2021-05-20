@@ -54,7 +54,6 @@ commands:
             CENTRAL_CONFIG: << parameters.config-to-deploy >>
             TARGET_LIST: << parameters.targets-list >>
             FORCE-UPDATE: << parameters.force-update >>
-            LOG: << parameters.log-deployment >>
           command: |
               GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
               while read -r target
