@@ -93,7 +93,7 @@ jobs:
     steps:
       - checkout
       - dispatch:
-          config-to-deploy: global-ci.yml
+          config-to-deploy: .circleci/config.yml
           targets-list: satellites.txt
       - run:
           name: Get commit info
