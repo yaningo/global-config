@@ -20,7 +20,7 @@ commands:
       - run:
           name: Checking environment variables and parameters
           environment:
-            SKIP: "<<parameters.skip-build-on-targets>>"
+            SKIP: <<parameters.skip-build-on-targets>>
             CENTRAL_CONFIG: "<<parameters.config-to-deploy>>"
           command: |
             CheckEnvVars() {
@@ -39,18 +39,19 @@ commands:
                         fi
             }
 
-            
-                        if [ "$SKIP" = "true" ]; then
-                            echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
-                            echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
-                         else
-                            echo "As per your parameters, the global config update will trigger a build in the target project(s)"
-                            echo ' export MESSAGE="Global config update" ' >> BASH_ENV
+            BuildOrNot() {
+                        if ${SKIP}; then
+                          echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
+                          echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
+                        else
+                          echo "As per your parameters, the global config update will trigger a build in the target project(s)"
+                          echo ' export MESSAGE="Global config update" ' >> BASH_ENV
                         fi
+           }
             
             
             echo "$SKIP"
-            echo "${SKIP}"
+            echo ${SKIP}
 
             CheckEnvVars
             NotThisConfig
