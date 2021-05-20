@@ -73,11 +73,9 @@ commands:
 
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") = 404 ]]; then
 
-                    curl -s -w '%{response_code}' --output /dev/null -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}'
-                    
-                    cat /tmp/response.status
+                    curl -s -w '%{response_code}' --output /dev/null -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > tmp/reponse.status
 
-                      if [[ ${LOG} ]] && [[ "$(cat /tmp/response.status)" == "200"]]; then
+                      if [[ ${LOG} ]] && [[ "$(cat /tmp/response.status)" = "200"]]; then
                         echo "${CENTRAL_CONFIG} was deployed to $target" >> /tmp/deployment.log
                       fi
                   else
@@ -85,10 +83,8 @@ commands:
 
                       if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE-UPDATE} ]]; then
                         curl -s -w '%{response_code}' --output /dev/null -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > tmp/reponse.status
-                        
-                        cat /tmp/response.status
 
-                        if [[ ${LOG} ]] && [[ "$(cat /tmp/response.status)" == "200"]]; then
+                        if [[ ${LOG} ]] && [[ "$(cat /tmp/response.status)" = "200"]]; then
                           echo "${CENTRAL_CONFIG} was deployed to $target" >> /tmp/deployment.log
                         fi
                       else
@@ -96,14 +92,14 @@ commands:
                       fi
                   fi  
                 done < ${TARGET_LIST}
-                
+
       - when:
           condition: << parameters.log-deployment >>
           steps:
             - store_artifacts:
                 path: /tmp/deployment.log
                 destination: deployment.log      
-                
+
 jobs:
   # config-validation:
   #   parameters:
@@ -129,14 +125,14 @@ jobs:
           targets-list: satellites.txt
           force-update: true
           log-deployment : true
-          
+
       - run:
           name: Get commit info
           command: |
             echo << pipeline.git.revision >>
             # curl --location --request GET "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" -d "sha: << pipeline.git.revision >>"
             git log  -n 1
-          
+
 workflows:
   main:
     jobs:
