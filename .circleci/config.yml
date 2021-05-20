@@ -83,7 +83,7 @@ commands:
                           done < ${TARGET_LIST}
             }
             
-            DeployConf()
+            DeployConf
 jobs:
   # config-validation:
   #   parameters:
