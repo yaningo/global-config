@@ -23,13 +23,13 @@ commands:
             SKIP: << parameters.skip-build-on-targets >>
             CENTRAL_CONFIG: << parameters.config-to-deploy >>
           command: |
-              if [[ -z "${GHe_TOKEN:-}" ]]; then
+              if [[ -z "${GH_TOKEN:-}" ]]; then
                 echo "In order to use the Config dispatcher orb, an OAuth token must be present via the GH_TOKEN environment variable."
-                echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
+                echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token"
                 exit 1
               fi
 
-              if [ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]; then
+              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]]; then
                 echo "The configuratio file you're deploying can't be the same as this build's confguration file"
                 echo "Check the content of the configuratio file you're trying to deploy"
                 exit 1
