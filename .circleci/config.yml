@@ -61,7 +61,7 @@ commands:
                   REPO=$(echo $target | awk -F', ' '{print $1}')
                   BRANCH=$(echo $target | awk -F', ' '{print $2}')
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") = 404 ]]; then
-                    curl -s -w '%{response_code}' --output /tmp/deployment.log -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > /tmp/response.status
+                    curl -s -w '%{response_code}' --stderr - --output /dev/null -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > /tmp/response.status
 
                       if [[ "$(cat /tmp/response.status)" = "200" ]]; then
                         echo "${CENTRAL_CONFIG} was successfully deployed to $REPO [${BRANCH} branch]"
@@ -70,10 +70,10 @@ commands:
                     BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
 
                       if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE-UPDATE} ]]; then
-                        curl -s -w '%{response_code}' --output /tmp/deployment.log -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > /tmp/response.status
+                        curl -s -w '%{response_code}' --stderr - --output /dev/null  -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > /tmp/response.status
 
                         if [[ "$(cat /tmp/response.status)" = "200" ]]; then
-                          echo "${CENTRAL_CONFIG} was deployed to $REPO on the ${BRANCH:-default} branch"
+                          echo "${CENTRAL_CONFIG} was deployed to $REPO [${BRANCH} branch]"
                         fi
                       else
                         echo "The same version of the configuration file already exists in the target repository+branch."
