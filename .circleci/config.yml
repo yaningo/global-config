@@ -107,6 +107,7 @@ jobs:
       - dispatch:
           config-to-deploy: global-ci.yml
           targets-list: satellites.txt
+          force-update: true
       - run:
           name: Get commit info
           command: |
