@@ -40,7 +40,7 @@ commands:
             }
 
             BuildOrNot() {
-                        if [[ ${SKIP} == true ]]; then
+                        if ${SKIP}; then
                             echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                             echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
                          else
@@ -83,6 +83,7 @@ commands:
                           done < ${TARGET_LIST}
             }
             
+            echo ${MESSAGE}
             DeployConf
 jobs:
   # config-validation:
