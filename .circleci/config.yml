@@ -42,7 +42,7 @@ commands:
                 exit 1
               fi
 
-              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]]; then
+              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/project/.circleci/config.yml) ]]; then
                 echo "The configuratio file you're deploying can't be the same as this build's confguration file"
                 echo "Check the content of the configuratio file you're trying to deploy"
                 exit 1
@@ -92,6 +92,14 @@ commands:
                       fi
                   fi  
                 done < ${TARGET_LIST}
+                
+      - when:
+          condition: << parameters.log-deployment >>
+          steps:
+            - store_artifacts:
+                path: /tmp/deployment.log
+                destination: deployment.log      
+                
 jobs:
   # config-validation:
   #   parameters:
