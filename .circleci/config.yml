@@ -47,7 +47,7 @@ commands:
                           echo "As per your parameters, the global config update will trigger a build in the target project(s)"
                           echo ' export MESSAGE="Global config update" ' >> BASH_ENV
                         fi
-           }
+            }
             
             
             echo "$SKIP"
@@ -55,6 +55,7 @@ commands:
 
             CheckEnvVars
             NotThisConfig
+            BuildOrNot
             
       - run:
           name: Deploying configuration to targets
