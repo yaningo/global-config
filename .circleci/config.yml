@@ -29,19 +29,22 @@ commands:
                 exit 1
               fi
 
-              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]]; then
-                echo "The configuratio file you're deploying can't be the same as this build's confguration file"
+              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/project/.circleci/config.yml) ]]; then
+                echo "The configuration file you're deploying can't be the same as this build's confguration file"
                 echo "Check the content of the configuratio file you're trying to deploy"
                 exit 1
               fi
 
-              if $SKIP; then
+              if [[ $SKIP ]]; then
                 echo "As per your parameters, build will be skipped on target projects upon the configuration deployment"
                 echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
               else
                 echo "As per your parameters, the global config update will trigger a build in the target project(s)"
                 echo ' export MESSAGE="Global config update" ' >> BASH_ENV
               fi
+              
+              source BASH_ENV
+              echo $MESSAGE
 
             
       - run:
