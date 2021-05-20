@@ -1,2 +1,2 @@
-yaningo/setoup-again, master
+yaningo/setup-again
 yaningo/79083, custom-webhook
