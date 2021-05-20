@@ -32,7 +32,7 @@ commands:
             }
 
             NotThisConfig() {
-                        if [ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/.circleci/config.yml) ]; then
+                        if [ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/project/.circleci/config.yml) ]; then
                             echo "The configuratio file you're deploying can't be the same as this build's confguration file"
                             echo "Check the content of the configuratio file you're trying to deploy"
                             exit 1
@@ -61,15 +61,19 @@ commands:
             FORCE: << parameters.force-update >>
           command: |
             DeployConf() {
-                        GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
+                        GLOBAL_64=$(cat ${CENTRAL_CONFIG} | base64 -w 0)
+                        echo $GLOBAL_64
                         while read -r target
                           do
                             REPO=$(echo $target | awk -F', ' '{print $1}')
                             BRANCH=$(echo $target | awk -F', ' '{print $2}')
+                            echo $REPO
+                            echo$RANCH
                             if [ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") = 404 ]; then
                               curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}'
                             else
                               BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
+                              echo $BLOB_SHA
                               if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE} ]]; then
                                 curl -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}'
                               else
