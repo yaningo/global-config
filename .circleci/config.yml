@@ -80,7 +80,7 @@ commands:
                         echo "The same version of the configuration file already exists in the target repository+branch."
                       fi
                   fi  
-                done < $TARGET_JSON
+                done < "$TARGET_JSON"
       
       - store_artifacts:
           path: /tmp/deployment.log
