@@ -55,6 +55,7 @@ commands:
             TARGET_LIST: << parameters.targets-list >>
             FORCE-UPDATE: << parameters.force-update >>
           command: |
+              jq -c < satellites.json
               GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
               while read -r target
                 do
