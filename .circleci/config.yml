@@ -60,6 +60,8 @@ commands:
                 do
                   REPO=$(jq -c \<<< $TARGET_LIST |jq -r .'"target-repo"')
                   BRANCH=$(jq -c \<<< $TARGET_LIST |jq -r .'"target-branch"')
+                  echo $REPO
+                  echo $BRANCH
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") != 200 ]]; then
                     curl -s -w '%{response_code}' --output /tmp/deployment.log -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > /tmp/response.status
 
