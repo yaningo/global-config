@@ -58,8 +58,8 @@ commands:
               GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
               while read -r target
                 do
-                  REPO=$(echo $target | awk -F', ' '{print $1}')
-                  BRANCH=$(echo $target | awk -F', ' '{print $2}')
+                  REPO=$(jq -r '."target-repo"' < $target)
+                  BRANCH=$(jq -r '."target-branch"' < $target)
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") != 200 ]]; then
                     curl -s -w '%{response_code}' --output /tmp/deployment.log -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > /tmp/response.status
 
@@ -79,7 +79,7 @@ commands:
                         echo "The same version of the configuration file already exists in the target repository+branch."
                       fi
                   fi  
-                done < ${TARGET_LIST}
+                done < "jq -c < ${TARGET_LIST}"
       
       - store_artifacts:
           path: /tmp/deployment.log
@@ -107,7 +107,7 @@ jobs:
       - checkout
       - dispatch-config:
           config-to-deploy: global-ci.yml
-          targets-list: satellites.txt
+          targets-list: satellites.json
           force-update: true
 
       - run:
