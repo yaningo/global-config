@@ -80,7 +80,7 @@ commands:
                         echo "The same version of the configuration file already exists in the target repository+branch."
                       fi
                   fi  
-                done <<< $(jq -c < $TARGET_LIST)
+                done \\<<< $(jq -c < $TARGET_LIST)
                 
               }
               
