@@ -68,7 +68,7 @@ commands:
                         printf "\n${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}\n"
                       fi
                   else
-                    BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
+                    BLOB_SHA=$(curl --output /dev/null --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
 
                       if [[ $(git hash-object ${CENTRAL}) != $BLOB_SHA ]] || [[ "$FORCE-UPDATE" == "1" ]]; then
                         curl -s -w '%{response_code}' --output /tmp/deployment.log  -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > /tmp/response.status
