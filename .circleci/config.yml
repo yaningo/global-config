@@ -69,14 +69,11 @@ commands:
                         printf "\n${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}\n"
                       fi
                   else
-                    BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
-                    echo "$FORCE"
+                    BLOB_SHA=$(curl -s --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
 
                       if [ $(git hash-object ${CENTRAL}) != $BLOB_SHA ] || [ "$FORCE" == "1" ]; then
                         curl -s -o /dev/null -w '%{response_code}' -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > /tmp/response.status
                         
-                        cat /tmp/response.status
-
                         if [[ "$(cat /tmp/response.status)" = "200" ]]; then
                           printf "\n${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}]\n" | tee -a /tmp/deployment.log
                         fi
