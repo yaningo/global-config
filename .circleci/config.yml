@@ -78,10 +78,10 @@ commands:
                         cat /tmp/response.status
 
                         if [[ "$(cat /tmp/response.status)" = "200" ]]; then
-                          printf "\n${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}]." | tee -a /tmp/deployment.log
+                          printf "\n${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}]\n" | tee -a /tmp/deployment.log
                         fi
                       else
-                        printf "\nThe same version of the configuration file already exists in [branch: ${BRANCH}]."
+                        printf "\nThe same version of the configuration file already exists in [branch: ${BRANCH}]\n"
                       fi
                   fi  
                 done \<<< $(jq -c < $TARGET_LIST)
