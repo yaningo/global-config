@@ -34,7 +34,7 @@ commands:
                 echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
                 exit 1
               fi
-              if [ ! -s $TARGET_LIST ]; then
+              if [ ! -s ${TARGET_LIST} ]; then
                 echo "Target file is empty. Please add at least 1 target repository"
                 exit 1
               fi
