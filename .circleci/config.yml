@@ -43,7 +43,7 @@ commands:
                 echo "Check the content of the configuration file you're trying to deploy"
                 exit 1
               fi
-              if $SKIP; then
+              if [ "$SKIP" == "1" ]; then
                 echo "Build(s) will be skipped in target project(s)"
                 MESSAGE="Global config update [skip ci]"
               else
