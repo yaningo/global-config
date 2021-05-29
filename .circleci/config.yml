@@ -77,7 +77,8 @@ commands:
                           printf "${CENTRAL} was successfully deployed to $REPO [branch: ${BRANCH}\n"
                         fi
                       else
-                        echo -e "The same version of the configuration file already exists in the target repository and branch.\n"
+                        printf "The same version of the configuration file already exists in the target repository and branch.\n"
+                      fi
                   fi  
                 done \<<< $(jq -c < $TARGET_LIST)
               }
