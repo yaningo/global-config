@@ -29,7 +29,7 @@ commands:
             FORCE-UPDATE: << parameters.force-update >>
           command: |
             CheckEnv() {
-              if [[ -z "${GH_TOKEN:-}" ]]; then
+              if [ -z "${GH_TOKEN:-}" ]; then
                 echo "In order to use the Config dispatcher orb, an OAuth token must be present via the GH_TOKEN environment variable."
                 echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
                 exit 1
@@ -40,15 +40,15 @@ commands:
               fi
               if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/project/.circleci/config.yml) ]]; then
                 echo "The configuratio file you're deploying can't be the same as this build's confguration file"
-                echo "Check the content of the configuratio file you're trying to deploy"
+                echo "Check the content of the configuration file you're trying to deploy"
                 exit 1
               fi
               if $SKIP; then
                 echo "Build(s) will be skipped in target project(s)"
-                echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
+                MESSAGE="Global config update [skip ci]"
               else
                 echo "This config update will trigger builds in target project(s)"
-                echo ' export MESSAGE="Global config update" ' >> BASH_ENV
+                MESSAGE="Global config update"
               fi
             }
             
@@ -57,8 +57,8 @@ commands:
               while read -r target
                 do
                   echo $target
-                  REPO=$(jq -r '."target-repo"' <<< $target)
-                  BRANCH=$(jq -r '."target-branch"' <<< $target)
+                  REPO=$(jq -r '."target-repo"' <\<< $target)
+                  BRANCH=$(jq -r '."target-branch"' <\<< $target)
                   echo $REPO
                   echo $BRANCH
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") != 200 ]]; then
