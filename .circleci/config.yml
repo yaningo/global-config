@@ -98,7 +98,7 @@ jobs:
   #       description: Path to the configuration file to be deployed to all targets [REQUIRED]
   #       type: string
   #   docker:
-  #     - image: circleci/python
+  #     - image: circleci/python:latest
   #   steps:
   #     - checkout
   #     - run:
