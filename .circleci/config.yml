@@ -58,8 +58,8 @@ commands:
               while read -r target
                 do
                   ##echo $target
-                  REPO=$(jq -r '."target-repo"' \\<<< $target)
-                  BRANCH=$(jq -r '."target-branch"' \\<<< $target)
+                  REPO=$(jq -r '."target-repo"' \<<< $target)
+                  BRANCH=$(jq -r '."target-branch"' \<<< $target)
                   #echo $REPO
                   ##echo $BRANCH
                   if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") != 200 ]]; then
@@ -81,7 +81,7 @@ commands:
                         printf "\nThe same version of the configuration file already exists in [branch: ${BRANCH}]\n"
                       fi
                   fi  
-                done < $(jq -c \\<<< "${TARGET_LIST}")
+                done < $(jq -c \<<< "${TARGET_LIST}")
               }
               
               CheckEnv
