@@ -81,7 +81,7 @@ commands:
                         printf "\nThe same version of the configuration file already exists in [branch: ${BRANCH}]\n"
                       fi
                   fi  
-                done < $(jq -c < $TARGET_LIST)
+                done < $(cat "${TARGET_LIST} | jq -c)
               }
               
               CheckEnv
