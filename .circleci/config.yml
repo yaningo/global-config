@@ -9,7 +9,7 @@ jobs:
       - image: circleci/python
     steps:
       - checkout
-      - central/dispatch-config:
+      - central/dispatch:
           config-to-deploy: global-ci.yml
           targets-list: satellites.json
           force-update: true
