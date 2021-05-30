@@ -1,114 +1,15 @@
 version: 2.1
 
-commands:
-#   pull-config:
-#     parameters:
-
-  dispatch-config:
-    parameters:
-      force-update:
-        type: boolean
-        default: false
-      skip-build-on-targets:
-        type: boolean
-        default: true
-      config-to-deploy:
-        description: Path to the configuration file to be deployed to all targets [REQUIRED]
-        type: string
-      targets-list:
-        description: "Path to file containing the list of repo and branch targets. Format : org/repo, branch (1 target per line) [REQUIRED]"
-        type: string
-
-    steps:
-      - run:
-          name: Checking environment variables and parameters
-          environment:
-            SKIP: << parameters.skip-build-on-targets >>
-            CENTRAL_CONFIG: << parameters.config-to-deploy >>
-            TARGET_LIST: << parameters.targets-list >>
-          command: |
-              if [[ -z "${GH_TOKEN:-}" ]]; then
-                echo "In order to use the Config dispatcher orb, an OAuth token must be present via the GH_TOKEN environment variable."
-                echo "See instructions in the GitHub documentation: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-tokenp"
-                exit 1
-              fi
-              if [[ ! -s $TARGET_LIST ]]; then
-                echo "Target file is empty. Please add at least 1 target repository"
-                exit 1
-              fi
-              if [[ $(git hash-object ${CENTRAL_CONFIG}) = $(git hash-object $HOME/project/.circleci/config.yml) ]]; then
-                echo "The configuratio file you're deploying can't be the same as this build's confguration file"
-                echo "Check the content of the configuratio file you're trying to deploy"
-                exit 1
-              fi
-              if $SKIP; then
-                echo "Build(s) will be skipped in target project(s)"
-                echo ' export MESSAGE="Global config update [skip ci]" ' >> BASH_ENV
-              else
-                echo "This config update will trigger builds in target project(s)"
-                echo ' export MESSAGE="Global config update" ' >> BASH_ENV
-              fi
-      - run:
-          name: Deploying configuration to targets
-          environment:
-            CENTRAL_CONFIG: << parameters.config-to-deploy >>
-            TARGET_LIST: << parameters.targets-list >>
-            FORCE-UPDATE: << parameters.force-update >>
-          command: |
-              GLOBAL_64="$(cat ${CENTRAL_CONFIG} | base64 -w 0)"
-              while read -r target
-                do
-                  echo $target
-                  REPO=$(jq -r .'"target-repo"' \<<\< $target)
-                  BRANCH=$(jq -r .'"target-branch"' \<<<\ $target)
-                  echo $REPO
-                  echo $BRANCH
-                  if [[ $(curl -s -w '%{response_code}' --output /dev/null --location --request GET "https://api.github.com/repos/$REPO/contents/.circleci/config.yml?ref=$BRANCH" --header "Authorization: token $GH_TOKEN" --header "Accept: application/vnd.github.v3+json") != 200 ]]; then
-                    curl -s -w '%{response_code}' --output /tmp/deployment.log -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml -H "Authorization: token $GH_TOKEN" -H 'Accept: application/vnd.github.v3+json' -d '{"message":"'"$MESSAGE"'","content":"'"$GLOBAL_64"'","branch":"'"${BRANCH}"'"}' > /tmp/response.status
-
-                      if [[ "$(cat /tmp/response.status)" = "200" ]]; then
-                        echo "${CENTRAL_CONFIG} was successfully deployed to $REPO [${BRANCH} branch]"
-                      fi
-                  else
-                    BLOB_SHA=$(curl --location --request GET "https://api.github.com/repos/${REPO}/contents/.circleci/config.yml?ref=${BRANCH}" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json"|jq -r .sha)
-
-                      if [[ $(git hash-object ${CENTRAL_CONFIG}) != $BLOB_SHA ]] || [[ ${FORCE-UPDATE} ]]; then
-                        curl -s -w '%{response_code}' --output /tmp/deployment.log  -X PUT https://api.github.com/repos/$REPO/contents/.circleci/config.yml --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" --data-raw '{"message":"'"$MESSAGE"'","content":"'"${GLOBAL_64}"'","sha": "'"$BLOB_SHA"'","branch":"'"$BRANCH"'"}' > /tmp/response.status
-
-                        if [[ "$(cat /tmp/response.status)" = "200" ]]; then
-                          echo "${CENTRAL_CONFIG} was deployed to $REPO [${BRANCH} branch]"
-                        fi
-                      else
-                        echo "The same version of the configuration file already exists in the target repository+branch."
-                      fi
-                  fi  
-                done \<<\< $TARGET_LIST
-      
-      - store_artifacts:
-          path: /tmp/deployment.log
-          destination: deployment.log      
-
+orbs:
+  central: orbiously/central-config-orb@dev:alpha
+  
 jobs:
-  # config-validation:
-  #   parameters:
-  #     config-to-deploy:
-  #       description: Path to the configuration file to be deployed to all targets [REQUIRED]
-  #       type: string
-  #   docker:
-  #     - image: circleci/python
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Check global config validity
-  #         command: |
-  #             circleci config validate << parameters.config-to-deploy >>
-    
   deploy-config:
     docker:
       - image: circleci/python
     steps:
       - checkout
-      - dispatch-config:
+      - central/dispatch-config:
           config-to-deploy: global-ci.yml
           targets-list: satellites.json
           force-update: true
