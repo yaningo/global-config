@@ -27,7 +27,7 @@ workflows:
       - build
   workflow-2:
     when:
-      equal: [true, << pipeline.parameters.setup-workflow >>]
+      equal: [false, << pipeline.parameters.setup-workflow >>]
     jobs:
       - build
       - deploy:
