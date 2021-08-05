@@ -3,9 +3,9 @@ version: 2.1
 parameters:
   setup-workflow:
     type: boolean
-    default: true
+    default: false
 
-setup: true
+setup: << pipeline.parameters.setup-workflow >>
 
 jobs:
   build:
