@@ -5,7 +5,7 @@ parameters:
     type: boolean
     default: true
 
-setup: false
+setup: true
 
 jobs:
   build:
