@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  setup-workflow:
+    type: boolean
+    default: true
+    
 setup: true
 
 jobs:
