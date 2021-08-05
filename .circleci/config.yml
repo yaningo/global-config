@@ -1,20 +1,35 @@
 version: 2.1
 
-orbs:
-  continuation: circleci/continuation@0.1.2
-  
-setup: true #You can also try with false
+setup: true
 
 jobs:
-  setup:
+  build:
     docker:
       - image: cimg/base:stable
     steps:
-      - checkout
-      - continuation/continue:
-          configuration_path: ".circleci/continuation-config.yml"
+      - run: echo "This is a step in a job"
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: echo "This is a step in another job"
 
 workflows:
-  upflow:
+  workflow-1:
+    when:
+      equal: [true, << pipeline.parameters.setup-workflow >>]
     jobs:
-      - setup
+      - build
+  workflow-2:
+    when:
+      equal: [false, << pipeline.parameters.setup-workflow >>]
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+  workflow-3:
+    when:
+      equal: [false, << pipeline.parameters.setup-workflow >>]
+    jobs:
+      - deploy
