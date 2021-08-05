@@ -11,7 +11,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - continuation/continue:
-          configuration_path: ".circleci/continuation-config.yml"
+          configuration_path: "/.circleci/continuation-config.yml"
 
 workflows:
   upflow:
