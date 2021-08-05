@@ -1,40 +1,19 @@
 version: 2.1
 
-parameters:
-  setup-workflow:
-    type: boolean
-    default: false
-
-setup: << pipeline.parameters.setup-workflow >>
+orbs:
+  continuation: circleci/continuation@0.1.2
+  
+setup: true
 
 jobs:
-  build:
+  setup:
     docker:
       - image: cimg/base:stable
     steps:
-      - run: echo "hi"
-  deploy:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - run: echo "hi"
+      - continuation/continue:
+          configuration_path: ".circleci/continuation-config.yml"
 
 workflows:
-  workflow-1:
-    when:
-      equal: [true, << pipeline.parameters.setup-workflow >>]
+  upflow:
     jobs:
-      - build
-  workflow-2:
-    when:
-      equal: [false, << pipeline.parameters.setup-workflow >>]
-    jobs:
-      - build
-      - deploy:
-          requires:
-            - build
-  workflow-3:
-    when:
-      equal: [false, << pipeline.parameters.setup-workflow >>]
-    jobs:
-      - deploy
+      - setup
