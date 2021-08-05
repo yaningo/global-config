@@ -1,31 +1,40 @@
 version: 2.1
 
-orbs:
-  central: orbiously/central-config-orb@dev:alpha
-  
-jobs:
-  deploy-config:
-    docker:
-      - image: circleci/python
-    steps:
-      - checkout
-      - central/dispatch-config:
-          config-to-deploy: global-ci.yml
-          targets-list: satellites.json
-          force-update: true
+parameters:
+  setup-workflow:
+    type: boolean
+    default: true
 
-      - run:
-          name: Get commit info
-          command: |
-            echo << pipeline.git.revision >>
-            echo Hello
-            # curl --location --request GET "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits" --header "Authorization: token ${GH_TOKEN}" --header "Accept: application/vnd.github.v3+json" -d "sha: << pipeline.git.revision >>"
-            git log  -n 1
+setup: false
+
+jobs:
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: echo "hi"
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: echo "hi"
+
 workflows:
-  main:
+  workflow-1:
+    when:
+      equal: [true, << pipeline.parameters.setup-workflow >>]
     jobs:
-      # - config-validation:
-      #     config-to-deploy: global-ci.yml
-      - deploy-config
-          # requires:
-            # - config-validation
+      - build
+  workflow-2:
+    when:
+      equal: [true, << pipeline.parameters.setup-workflow >>]
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+  workflow-3:
+    when:
+      equal: [false, << pipeline.parameters.setup-workflow >>]
+    jobs:
+      - deploy
